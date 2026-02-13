@@ -2,6 +2,7 @@ package ru.otus.hw.service;
 
 import lombok.RequiredArgsConstructor;
 import ru.otus.hw.dao.QuestionDao;
+import ru.otus.hw.domain.Answer;
 import ru.otus.hw.domain.Question;
 
 import java.util.List;
@@ -19,27 +20,29 @@ public class TestServiceImpl implements TestService {
         ioService.printFormattedLine("Please answer the questions below%n");
         List<Question> questions = questionDao.findAll();
         if (questions.isEmpty()) {
-            ioService.printLine("No questions. Check your CSV file.");
+            ioService.printLine("No questions.");
             return;
         }
+        outputQuestionsWithAnswer(questions);
+    }
 
+    private void outputQuestionsWithAnswer(List<Question> questions) {
         for (int i = 0; i < questions.size(); i++) {
             Question question = questions.get(i);
             ioService.printFormattedLine("%d. %s", i + 1, question.text());
-            getAnswers(question.answers());
+            outputAnswers(question.answers());
             ioService.printLine("");
         }
     }
 
-    private void getAnswers(List<ru.otus.hw.domain.Answer> answers) {
+    private void outputAnswers(List<Answer> answers) {
         if (answers == null || answers.isEmpty()) {
             ioService.printLine("No answers available");
             return;
         }
         for (int i = 0; i < answers.size(); i++) {
-            char optionLetter = (char) ('a' + i);
             String answerText = answers.get(i).text();
-            ioService.printFormattedLine("   %c) %s", optionLetter, answerText);
+            ioService.printFormattedLine("   %d) %s", i + 1, answerText);
         }
     }
 

@@ -37,14 +37,14 @@ class TestServiceImplTest {
         when(questionDao.findAll()).thenReturn(List.of(question));
         testService.executeTest();
         verify(ioService).printFormattedLine("%d. %s", 1, "Sample question?");
-        verify(ioService).printFormattedLine("   %c) %s", 'a', "Answer A");
-        verify(ioService).printFormattedLine("   %c) %s", 'b', "Answer B");
+        verify(ioService).printFormattedLine("   %d) %s", 1, "Answer A");
+        verify(ioService).printFormattedLine("   %d) %s", 2, "Answer B");
     }
 
     @Test
     void shouldHandleEmptyQuestionsList() {
         when(questionDao.findAll()).thenReturn(List.of());
         testService.executeTest();
-        verify(ioService).printLine("No questions. Check your CSV file.");
+        verify(ioService).printLine("No questions.");
     }
 }
