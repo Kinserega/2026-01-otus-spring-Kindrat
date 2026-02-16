@@ -9,7 +9,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ru.otus.hw.dao.QuestionDao;
 import ru.otus.hw.domain.Answer;
 import ru.otus.hw.domain.Question;
+import ru.otus.hw.exceptions.QuestionReadException;
+
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,15 +41,15 @@ class TestServiceImplTest {
     void shouldPrintQuestionAndAnswers() {
         when(questionDao.findAll()).thenReturn(List.of(question));
         testService.executeTest();
-        verify(ioService).printFormattedLine("%d. %s", 1, "Sample question?");
-        verify(ioService).printFormattedLine("   %d) %s", 1, "Answer A");
-        verify(ioService).printFormattedLine("   %d) %s", 2, "Answer B");
+        verify(ioService).printLine("1. Sample question?");
+        verify(ioService).printLine("   1) Answer A");
+        verify(ioService).printLine("   2) Answer B");
     }
 
     @Test
     void shouldHandleEmptyQuestionsList() {
         when(questionDao.findAll()).thenReturn(List.of());
-        testService.executeTest();
-        verify(ioService).printLine("No questions.");
+        QuestionReadException exception = assertThrows(QuestionReadException.class, () -> testService.executeTest());
+        assertEquals("No questions found in file", exception.getMessage());
     }
 }

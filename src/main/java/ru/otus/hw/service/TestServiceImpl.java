@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import ru.otus.hw.dao.QuestionDao;
 import ru.otus.hw.domain.Answer;
 import ru.otus.hw.domain.Question;
+import ru.otus.hw.exceptions.QuestionReadException;
 
 import java.util.List;
 
@@ -20,8 +21,7 @@ public class TestServiceImpl implements TestService {
         ioService.printFormattedLine("Please answer the questions below%n");
         List<Question> questions = questionDao.findAll();
         if (questions.isEmpty()) {
-            ioService.printLine("No questions.");
-            return;
+            throw new QuestionReadException("No questions found, check file");
         }
         outputQuestionsWithAnswer(questions);
     }
@@ -29,7 +29,8 @@ public class TestServiceImpl implements TestService {
     private void outputQuestionsWithAnswer(List<Question> questions) {
         for (int i = 0; i < questions.size(); i++) {
             Question question = questions.get(i);
-            ioService.printFormattedLine("%d. %s", i + 1, question.text());
+            String questionToString = convertQuestionToString(i + 1, question.text());
+            ioService.printLine(questionToString);
             outputAnswers(question.answers());
             ioService.printLine("");
         }
@@ -37,13 +38,21 @@ public class TestServiceImpl implements TestService {
 
     private void outputAnswers(List<Answer> answers) {
         if (answers == null || answers.isEmpty()) {
-            ioService.printLine("No answers available");
-            return;
+            throw new QuestionReadException("No answer by questions, check file");
         }
         for (int i = 0; i < answers.size(); i++) {
             String answerText = answers.get(i).text();
-            ioService.printFormattedLine("   %d) %s", i + 1, answerText);
+            String answer = convertAnswerToString(i + 1, answerText);
+            ioService.printLine(answer);
         }
+    }
+
+    private String convertQuestionToString(int number, String text) {
+        return String.format("%d. %s", number, text);
+    }
+
+    private String convertAnswerToString(int number, String text) {
+        return String.format("   %d) %s", number, text);
     }
 
 }

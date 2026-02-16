@@ -39,8 +39,10 @@ public class CsvQuestionDao implements QuestionDao {
                     .map(QuestionDto::toDomainObject)
                     .collect(Collectors.toList());
 
+        } catch (IllegalArgumentException e) {
+            throw new QuestionReadException(String.format("Invalid CSV format. Check file structure: %s", fileName), e);
         } catch (Exception e) {
-            throw new QuestionReadException(String.format("Failed to read questions from file: %s", fileName), e);
+            throw new QuestionReadException("Failed to load questions due to unexpected error.");
         }
     }
 }

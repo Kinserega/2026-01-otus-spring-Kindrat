@@ -14,8 +14,6 @@ public class TestRunnerServiceImpl implements TestRunnerService {
             testService.executeTest();
         } catch (QuestionReadException questionReadException) {
             System.err.println(questionReadException.getMessage());
-        } catch (Exception exception) {
-            System.err.println(exception.getMessage());
         }
     }
 }
