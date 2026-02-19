@@ -8,12 +8,18 @@ public class TestRunnerServiceImpl implements TestRunnerService {
 
     private final TestService testService;
 
+    private final IOService ioService;
+
     @Override
     public void run() {
         try {
             testService.executeTest();
-        } catch (QuestionReadException questionReadException) {
-            System.err.println(questionReadException.getMessage());
+        } catch (QuestionReadException e) {
+            ioService.printLine("Error: Failed to load or parcel test questions. Check file");
+        } catch (Exception e) {
+            ioService.printLine("Critical  error application: " + e.getMessage());
         }
     }
+
+
 }

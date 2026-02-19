@@ -29,25 +29,35 @@ public class TestServiceImpl implements TestService {
     private void outputQuestionsWithAnswer(List<Question> questions) {
         for (int i = 0; i < questions.size(); i++) {
             Question question = questions.get(i);
-            String questionToString = convertQuestionToString(i + 1, question.text());
-            ioService.printLine(questionToString);
-            outputAnswers(question.answers());
-            ioService.printLine("");
+            String questionWithAnswerToString = convertQuestionToString(i + 1, question);
+            ioService.printLine(questionWithAnswerToString);
         }
     }
 
-    private void outputAnswers(List<Answer> answers) {
-        if (answers == null || answers.isEmpty()) {
-            throw new QuestionReadException("No answer by questions, check file");
-        }
+    private String convertQuestionToString(int number, Question question) {
+        String questionHeader = convertQuestionHeaderToString(number, question.text());
+        String answersString = convertAnswersToString(question.answers());
+        return questionHeader + System.lineSeparator() + answersString;
+    }
+
+    private String convertAnswersToString(List<ru.otus.hw.domain.Answer> answers) {
+        StringBuilder answersBuilder = new StringBuilder();
         for (int i = 0; i < answers.size(); i++) {
-            String answerText = answers.get(i).text();
-            String answer = convertAnswerToString(i + 1, answerText);
-            ioService.printLine(answer);
+            appendAnswerWithNewline(answersBuilder, answers, i);
+        }
+        return answersBuilder.toString();
+    }
+
+    private void appendAnswerWithNewline(StringBuilder answersBuilder, List<Answer> answers, int index) {
+        String answerText = answers.get(index).text();
+        String formattedAnswer = convertAnswerToString(index + 1, answerText);
+        answersBuilder.append(formattedAnswer);
+        if (index < answers.size() - 1) {
+            answersBuilder.append(System.lineSeparator());
         }
     }
 
-    private String convertQuestionToString(int number, String text) {
+    private String convertQuestionHeaderToString(int number, String text) {
         return String.format("%d. %s", number, text);
     }
 

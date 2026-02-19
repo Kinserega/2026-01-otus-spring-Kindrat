@@ -41,15 +41,14 @@ class TestServiceImplTest {
     void shouldPrintQuestionAndAnswers() {
         when(questionDao.findAll()).thenReturn(List.of(question));
         testService.executeTest();
-        verify(ioService).printLine("1. Sample question?");
-        verify(ioService).printLine("   1) Answer A");
-        verify(ioService).printLine("   2) Answer B");
+        String expectedOutput = "1. Sample question?" + System.lineSeparator() + "   1) Answer A" + System.lineSeparator() + "   2) Answer B";
+        verify(ioService).printLine(expectedOutput);
     }
 
     @Test
     void shouldHandleEmptyQuestionsList() {
         when(questionDao.findAll()).thenReturn(List.of());
         QuestionReadException exception = assertThrows(QuestionReadException.class, () -> testService.executeTest());
-        assertEquals("No questions found in file", exception.getMessage());
+        assertEquals("No questions found, check file", exception.getMessage());
     }
 }
