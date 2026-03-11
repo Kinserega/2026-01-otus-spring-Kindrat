@@ -15,9 +15,9 @@ public class TestRunnerServiceImpl implements TestRunnerService {
         try {
             testService.executeTest();
         } catch (QuestionReadException e) {
-            ioService.printLine("Error: Failed to load or parcel test questions. Check file");
+            ioService.printLine("Error: Failed to load test questions");
         } catch (Exception e) {
-            ioService.printLine("Critical  error application: " + e.getMessage());
+            ioService.printLine("Critical  error application");
         }
     }
 
