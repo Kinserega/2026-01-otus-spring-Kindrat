@@ -42,7 +42,7 @@ public class CsvQuestionDao implements QuestionDao {
         } catch (IllegalArgumentException e) {
             throw new QuestionReadException(String.format("Invalid CSV format. Check file structure: %s", fileName), e);
         } catch (Exception e) {
-            throw new QuestionReadException("Failed to load questions due to unexpected error.");
+            throw new QuestionReadException("Failed to load questions due to unexpected error.", e);
         }
     }
 }
