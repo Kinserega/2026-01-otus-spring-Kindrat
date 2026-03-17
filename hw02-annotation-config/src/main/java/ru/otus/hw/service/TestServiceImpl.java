@@ -1,7 +1,7 @@
 package ru.otus.hw.service;
 
 import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import ru.otus.hw.dao.QuestionDao;
 import ru.otus.hw.domain.Answer;
 import ru.otus.hw.domain.Question;
@@ -12,7 +12,7 @@ import ru.otus.hw.exceptions.TestProcessException;
 
 import java.util.List;
 
-@Component
+@Service
 @AllArgsConstructor
 public class TestServiceImpl implements TestService {
 
@@ -28,16 +28,15 @@ public class TestServiceImpl implements TestService {
             var questions = questionDao.findAll();
             var testResult = new TestResult(student);
 
-            int questionNumber = 1;
-            for (var question : questions) {
-                printQuestionWithNumber(questionNumber, question);
+            for (int i = 0; i < questions.size(); i++) {
+                Question question = questions.get(i);
+                printQuestionWithNumber(i + 1, question);
                 printAnswers(question.answers());
 
                 var userAnswer = getUserAnswer(question.answers().size());
                 var isCorrect = checkAnswer(question.answers(), userAnswer);
 
                 testResult.applyAnswer(question, isCorrect);
-                questionNumber++;
             }
             return testResult;
         } catch (QuestionReadException e) {

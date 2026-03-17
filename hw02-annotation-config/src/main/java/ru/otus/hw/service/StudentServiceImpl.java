@@ -1,10 +1,10 @@
 package ru.otus.hw.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import ru.otus.hw.domain.Student;
 
-@Component
+@Service
 @RequiredArgsConstructor
 public class StudentServiceImpl implements StudentService {
 

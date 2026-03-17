@@ -85,12 +85,6 @@
             <optional>true</optional>
             <version>${lombok.version}</version>
         </dependency>
-        <dependency>
-            <groupId>ru.otus.hw</groupId>
-            <artifactId>hw1</artifactId>
-            <version>1.0</version>
-            <scope>test</scope>
-        </dependency>
 
     </dependencies>
 
