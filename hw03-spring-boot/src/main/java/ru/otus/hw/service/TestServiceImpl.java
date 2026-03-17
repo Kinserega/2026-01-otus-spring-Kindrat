@@ -28,16 +28,15 @@ public class TestServiceImpl implements TestService {
             var questions = questionDao.findAll();
             var testResult = new TestResult(student);
 
-            int questionNumber = 1;
-            for (var question : questions) {
-                printQuestionWithNumber(questionNumber, question);
+            for (int i = 0; i < questions.size(); i++) {
+                Question question = questions.get(i);
+                printQuestionWithNumber(i + 1, question);
                 printAnswers(question.answers());
 
                 var userAnswer = getUserAnswer(question.answers().size());
                 var isCorrect = checkAnswer(question.answers(), userAnswer);
 
                 testResult.applyAnswer(question, isCorrect);
-                questionNumber++;
             }
             return testResult;
         } catch (QuestionReadException e) {
@@ -58,7 +57,8 @@ public class TestServiceImpl implements TestService {
     }
 
     private int getUserAnswer(int maxAnswerNumber) {
-        return ioService.readIntForRangeWithPrompt(1, maxAnswerNumber, "Your answer: ", "Invalid answer. Try again.");
+        return ioService.readIntForRangeWithPromptLocalized(1, maxAnswerNumber,
+                "TestService.answer.prompt", "TestService.answer.error");
     }
 
     private boolean checkAnswer(List<Answer> answers, int answerNumber) {
