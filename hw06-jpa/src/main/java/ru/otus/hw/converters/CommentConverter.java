@@ -2,7 +2,7 @@ package ru.otus.hw.converters;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.otus.hw.models.Comment;
+import ru.otus.hw.entity.Comment;
 
 @RequiredArgsConstructor
 @Component

@@ -3,7 +3,7 @@ package ru.otus.hw.repositories;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import ru.otus.hw.models.Genre;
+import ru.otus.hw.entity.Genre;
 
 import java.util.Collections;
 import java.util.List;

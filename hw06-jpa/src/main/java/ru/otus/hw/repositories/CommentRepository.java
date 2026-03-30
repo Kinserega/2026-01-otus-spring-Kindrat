@@ -1,6 +1,6 @@
 package ru.otus.hw.repositories;
 
-import ru.otus.hw.models.Comment;
+import ru.otus.hw.entity.Comment;
 
 import java.util.List;
 import java.util.Optional;

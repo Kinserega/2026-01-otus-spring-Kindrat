@@ -1,4 +1,4 @@
-package ru.otus.hw.models;
+package ru.otus.hw.entity;
 
 import jakarta.persistence.Table;
 import jakarta.persistence.Entity;
@@ -20,13 +20,13 @@ import lombok.ToString;
 @AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(onlyExplicitlyIncluded = true)
-@Table(name = "authors")
-public class Author {
+@Table(name = "genres")
+public class Genre {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(name = "full_name", nullable = false)
-    private String fullName;
+    @Column(name = "name", nullable = false)
+    private String name;
 }

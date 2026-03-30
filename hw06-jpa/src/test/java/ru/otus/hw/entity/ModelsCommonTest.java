@@ -1,4 +1,4 @@
-package ru.otus.hw.models;
+package ru.otus.hw.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

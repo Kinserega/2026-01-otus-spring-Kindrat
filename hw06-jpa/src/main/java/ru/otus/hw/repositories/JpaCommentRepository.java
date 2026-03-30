@@ -4,7 +4,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import ru.otus.hw.models.Comment;
+import ru.otus.hw.entity.Comment;
 
 import java.util.List;
 import java.util.Optional;
