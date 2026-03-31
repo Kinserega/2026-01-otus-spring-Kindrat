@@ -1,12 +1,14 @@
 package ru.otus.hw.repositories;
 
+import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.NoResultException;
+import jakarta.persistence.TypedQuery;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import ru.otus.hw.entity.Book;
+import ru.otus.hw.models.Book;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Repository
@@ -17,25 +19,23 @@ public class JpaBookRepository implements BookRepository {
 
     @Override
     public Optional<Book> findById(long id) {
-        try {
-            Book book = entityManager.createQuery("""
-                    select distinct b from Book b join fetch b.author
-                    left join fetch b.genres where b.id = :id
-                    """, Book.class)
-                    .setParameter("id", id)
-                    .getSingleResult();
-            return Optional.of(book);
-        } catch (NoResultException ex) {
-            return Optional.empty();
+        EntityGraph<?> entityGraph = entityManager.getEntityGraph("author-graph");
+        Map<String, Object> hints = Map.of("jakarta.persistence.fetchgraph", entityGraph);
+        Book book = entityManager.find(Book.class, id, hints);
+        if (book != null) {
+            book.getGenres().size();
         }
+        return Optional.ofNullable(book);
     }
 
     @Override
     public List<Book> findAll() {
-        return entityManager.createQuery("""
-                select distinct b from Book b
-                join fetch b.author left join fetch b.genres""", Book.class)
-                .getResultList();
+        EntityGraph<?> entityGraph = entityManager.getEntityGraph("author-graph");
+        TypedQuery<Book> query = entityManager.createQuery("select b from Book b", Book.class);
+        query.setHint("jakarta.persistence.fetchgraph", entityGraph);
+        List<Book> books = query.getResultList();
+        books.forEach(book -> book.getGenres().size());
+        return books;
     }
 
     @Override

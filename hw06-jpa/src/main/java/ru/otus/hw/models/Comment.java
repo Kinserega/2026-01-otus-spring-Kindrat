@@ -1,4 +1,4 @@
-package ru.otus.hw.entity;
+package ru.otus.hw.models;
 
 import jakarta.persistence.Table;
 import jakarta.persistence.Entity;
@@ -28,9 +28,12 @@ public class Comment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
+    @ToString.Include
     private Long id;
 
     @Column(name = "text", nullable = false)
+    @ToString.Include
     private String text;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

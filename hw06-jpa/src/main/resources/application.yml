@@ -7,4 +7,10 @@ spring:
     init:
       mode: always
       data-locations: data.sql
-      schema-locations: schema.sql
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true

@@ -6,6 +6,8 @@ import org.springframework.shell.standard.ShellMethod;
 import ru.otus.hw.converters.CommentConverter;
 import ru.otus.hw.services.CommentService;
 
+import java.util.stream.Collectors;
+
 
 @RequiredArgsConstructor
 @ShellComponent
@@ -22,6 +24,13 @@ public class CommentCommands {
                 .orElse("Comment with id %d not found".formatted(id));
     }
 
+    @ShellMethod(value = "Find all comments by book id", key = "acb")
+    public String findAllCommentsByBookId(long bookId) {
+        return commentService.findAllByBookId(bookId).stream()
+                .map(commentConverter::commentToString)
+                .collect(Collectors.joining("," + System.lineSeparator()));
+    }
+
     @ShellMethod(value = "Insert comment", key = "cins")
     public String insertComment(String text, long bookId) {
         var savedComment = commentService.insert(text, bookId);
@@ -29,8 +38,8 @@ public class CommentCommands {
     }
 
     @ShellMethod(value = "Update comment", key = "cupd")
-    public String updateComment(long id, String text, long bookId) {
-        var savedComment = commentService.update(id, text, bookId);
+    public String updateComment(long id, String text) {
+        var savedComment = commentService.update(id, text);
         return commentConverter.commentToString(savedComment);
     }
 

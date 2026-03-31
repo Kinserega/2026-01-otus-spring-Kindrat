@@ -1,4 +1,4 @@
-package ru.otus.hw.entity;
+package ru.otus.hw.models;
 
 import jakarta.persistence.Table;
 import jakarta.persistence.Entity;
@@ -25,8 +25,11 @@ public class Genre {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
+    @ToString.Include
     private long id;
 
     @Column(name = "name", nullable = false)
+    @ToString.Include
     private String name;
 }

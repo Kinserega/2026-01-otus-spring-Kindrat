@@ -4,11 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.exceptions.EntityNotFoundException;
-import ru.otus.hw.entity.Book;
-import ru.otus.hw.entity.Comment;
+import ru.otus.hw.models.Book;
+import ru.otus.hw.models.Comment;
 import ru.otus.hw.repositories.BookRepository;
 import ru.otus.hw.repositories.CommentRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -26,28 +27,30 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    @Transactional
-    public Comment insert(String text, long bookId) {
-        return save(null, text, bookId);
+    public List<Comment> findAllByBookId(long bookId) {
+        return commentRepository.findAllByBookId(bookId);
     }
 
     @Override
     @Transactional
-    public Comment update(long id, String text, long bookId) {
-        return save(id, text, bookId);
+    public Comment insert(String text, long bookId) {
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new EntityNotFoundException("Book with id %d not found".formatted(bookId)));
+        var comment = new Comment();
+        comment.setText(text);
+        comment.setBook(book);
+        return commentRepository.save(comment);
+    }
+
+    @Override
+    @Transactional
+    public Comment update(long id, String text) {
+        return commentRepository.update(id, text);
     }
 
     @Override
     @Transactional
     public void deleteById(long id) {
         commentRepository.deleteById(id);
-    }
-
-    private Comment save(Long id, String text, long bookId) {
-        Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new EntityNotFoundException("Book with id %d not found".formatted(bookId)));
-
-        Comment comment = new Comment(id, text, book);
-        return commentRepository.save(comment);
     }
 }
