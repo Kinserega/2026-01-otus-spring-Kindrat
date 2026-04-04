@@ -3,7 +3,9 @@ package ru.otus.hw.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.otus.hw.dto.BookDto;
 import ru.otus.hw.exceptions.EntityNotFoundException;
+import ru.otus.hw.mapper.BookMapper;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.repositories.AuthorRepository;
 import ru.otus.hw.repositories.BookRepository;
@@ -24,28 +26,33 @@ public class BookServiceImpl implements BookService {
 
     private final BookRepository bookRepository;
 
+    private final BookMapper bookMapper;
+
     @Override
     @Transactional(readOnly = true)
-    public Optional<Book> findById(long id) {
-        return bookRepository.findById(id);
+    public Optional<BookDto> findById(long id) {
+        return bookRepository.findById(id)
+                .map(bookMapper::toDto);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<Book> findAll() {
-        return bookRepository.findAll();
+    public List<BookDto> findAll() {
+        return bookMapper.toDtoList(bookRepository.findAll());
     }
 
     @Override
     @Transactional
-    public Book insert(String title, long authorId, Set<Long> genresIds) {
-        return save(0, title, authorId, genresIds);
+    public BookDto insert(String title, long authorId, Set<Long> genresIds) {
+        Book savedBook = save(0L, title, authorId, genresIds);
+        return bookMapper.toDto(savedBook);
     }
 
     @Override
     @Transactional
-    public Book update(long id, String title, long authorId, Set<Long> genresIds) {
-        return save(id, title, authorId, genresIds);
+    public BookDto update(long id, String title, long authorId, Set<Long> genresIds) {
+        Book savedBook = save(id, title, authorId, genresIds);
+        return bookMapper.toDto(savedBook);
     }
 
     @Override
@@ -56,7 +63,7 @@ public class BookServiceImpl implements BookService {
 
     private Book save(long id, String title, long authorId, Set<Long> genresIds) {
         if (isEmpty(genresIds)) {
-            throw new IllegalArgumentException("Genres ids must not be null");
+            throw new IllegalArgumentException("Genres ids must not be null or empty");
         }
 
         var author = authorRepository.findById(authorId)

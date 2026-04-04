@@ -3,7 +3,9 @@ package ru.otus.hw.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.otus.hw.dto.CommentDto;
 import ru.otus.hw.exceptions.EntityNotFoundException;
+import ru.otus.hw.mapper.CommentMapper;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Comment;
 import ru.otus.hw.repositories.BookRepository;
@@ -20,32 +22,37 @@ public class CommentServiceImpl implements CommentService {
 
     private final BookRepository bookRepository;
 
+    private final CommentMapper commentMapper;
+
     @Override
-    @Transactional(readOnly = true)
-    public Optional<Comment> findById(long id) {
-        return commentRepository.findById(id);
+    public Optional<CommentDto> findById(long id) {
+        return commentRepository.findById(id)
+                .map(commentMapper::toDto);
     }
 
     @Override
-    public List<Comment> findAllByBookId(long bookId) {
-        return commentRepository.findAllByBookId(bookId);
+    public List<CommentDto> findAllByBookId(long bookId) {
+        return commentMapper.toDtoList(
+                commentRepository.findAllByBookId(bookId));
     }
 
     @Override
     @Transactional
-    public Comment insert(String text, long bookId) {
+    public CommentDto insert(String text, long bookId) {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new EntityNotFoundException("Book with id %d not found".formatted(bookId)));
         var comment = new Comment();
         comment.setText(text);
         comment.setBook(book);
-        return commentRepository.save(comment);
+        Comment savedComment = commentRepository.save(comment);
+        return commentMapper.toDto(savedComment);
     }
 
     @Override
     @Transactional
-    public Comment update(long id, String text) {
-        return commentRepository.update(id, text);
+    public CommentDto update(long id, String text) {
+        Comment updatedComment = commentRepository.update(id, text);
+        return commentMapper.toDto(updatedComment);
     }
 
     @Override

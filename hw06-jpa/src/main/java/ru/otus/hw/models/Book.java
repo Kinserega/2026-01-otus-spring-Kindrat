@@ -22,6 +22,7 @@ import lombok.ToString;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -61,7 +62,7 @@ public class Book {
             inverseJoinColumns = @JoinColumn(name = "genre_id")
     )
     @Fetch(FetchMode.SUBSELECT)
-    private List<Genre> genres;
+    private List<Genre> genres = new ArrayList<>();
 }
 
 

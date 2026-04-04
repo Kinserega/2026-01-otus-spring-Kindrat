@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import ru.otus.hw.converters.CommentConverter;
+import ru.otus.hw.dto.CommentDto;
 import ru.otus.hw.services.CommentService;
 
 import java.util.stream.Collectors;
@@ -33,13 +34,13 @@ public class CommentCommands {
 
     @ShellMethod(value = "Insert comment", key = "cins")
     public String insertComment(String text, long bookId) {
-        var savedComment = commentService.insert(text, bookId);
+        CommentDto savedComment = commentService.insert(text, bookId);
         return commentConverter.commentToString(savedComment);
     }
 
     @ShellMethod(value = "Update comment", key = "cupd")
     public String updateComment(long id, String text) {
-        var savedComment = commentService.update(id, text);
+        CommentDto savedComment = commentService.update(id, text);
         return commentConverter.commentToString(savedComment);
     }
 
