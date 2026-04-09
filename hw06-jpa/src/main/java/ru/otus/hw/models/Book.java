@@ -6,11 +6,12 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Column;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.NamedEntityGraphs;
 import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.NamedAttributeNode;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.JoinTable;
 import lombok.AllArgsConstructor;
@@ -33,12 +34,19 @@ import java.util.List;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(onlyExplicitlyIncluded = true)
 @Table(name = "books")
-@NamedEntityGraph(
-        name = "author-graph",
-        attributeNodes = {
-                @NamedAttributeNode("author")
-        }
-)
+@NamedEntityGraphs({
+        @NamedEntityGraph(
+                name = "author-graph",
+                attributeNodes = {@NamedAttributeNode("author")}
+        ),
+        @NamedEntityGraph(
+                name = "author-genres-graph",
+                attributeNodes = {
+                        @NamedAttributeNode("author"),
+                        @NamedAttributeNode("genres")
+                }
+        )
+})
 public class Book {
 
     @Id
