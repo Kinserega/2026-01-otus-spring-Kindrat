@@ -13,6 +13,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.JoinTable;
+import jakarta.persistence.NamedEntityGraphs;
 import lombok.AllArgsConstructor;
 import lombok.Setter;
 import lombok.Getter;
@@ -33,12 +34,19 @@ import java.util.List;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(onlyExplicitlyIncluded = true)
 @Table(name = "books")
-@NamedEntityGraph(
-        name = "author-graph",
-        attributeNodes = {
-                @NamedAttributeNode("author")
-        }
-)
+@NamedEntityGraphs({
+        @NamedEntityGraph(
+                name = "author-graph",
+                attributeNodes = {@NamedAttributeNode("author")}
+        ),
+        @NamedEntityGraph(
+                name = "author-genres-graph",
+                attributeNodes = {
+                        @NamedAttributeNode("author"),
+                        @NamedAttributeNode("genres")
+                }
+        )
+})
 public class Book {
 
     @Id

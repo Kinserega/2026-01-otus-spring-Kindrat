@@ -11,6 +11,7 @@ import ru.otus.hw.models.Comment;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -145,12 +146,16 @@ public class CommentRepositoryTest {
         testEntityManager.flush();
         testEntityManager.clear();
 
-        commentRepository.update(comment.getId(), "Updated Text");
+        Optional<Comment> optionalComment = commentRepository.findById(comment.getId());
+        assertThat(optionalComment).isPresent();
+        Comment updateComment = optionalComment.get();
+        updateComment.setText("Updated Text");
+        Comment savedComment = commentRepository.save(updateComment);
 
         testEntityManager.flush();
         testEntityManager.clear();
 
-        Comment actualComment = testEntityManager.find(Comment.class, comment.getId());
+        Comment actualComment = testEntityManager.find(Comment.class, savedComment.getId());
 
         assertThat(actualComment).isNotNull();
         assertThat(actualComment.getText()).isEqualTo("Updated Text");

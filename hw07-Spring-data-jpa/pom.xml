@@ -12,7 +12,6 @@
     <groupId>ru.otus.hw</groupId>
     <artifactId>hw07-Spring-data-jpa</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>hw6</name>
 
     <properties>
         <java.version>17</java.version>
