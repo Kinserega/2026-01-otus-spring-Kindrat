@@ -6,7 +6,7 @@
 
 
     <groupId>ru.otus.hw</groupId>
-    <artifactId>hw2</artifactId>
+    <artifactId>hw02-annotation-config</artifactId>
     <version>1.0</version>
 
     <properties>
