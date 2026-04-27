@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Вход</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin-top: 100px;
+            text-align: center;
+        }
+
+        form {
+            display: inline-block;
+            padding: 20px;
+            border: 1px solid #ccc;
+        }
+
+        input {
+            margin: 5px 0;
+            padding: 6px;
+            width: 200px;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 6px 12px;
+        }
+
+        .error {
+            color: red;
+        }
+
+        .logout {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+
+<h3>Вход</h3>
+
+<div id="error" class="error" style="display:none;">
+    Неверный логин или пароль
+</div>
+
+<div id="logout" class="logout" style="display:none;">
+    Вы вышли из системы
+</div>
+
+<form action="/login" method="post">
+    <div>
+        <input name="username" type="text" placeholder="Логин" required/>
+    </div>
+
+    <div>
+        <input name="password" type="password" placeholder="Пароль" required/>
+    </div>
+
+    <button type="submit">Войти</button>
+</form>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.has("error")) {
+        document.getElementById("error").style.display = "block";
+    }
+
+    if (params.has("logout")) {
+        document.getElementById("logout").style.display = "block";
+    }
+</script>
+
+</body>
+</html>
