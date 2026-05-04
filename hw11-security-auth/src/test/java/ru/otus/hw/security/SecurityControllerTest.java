@@ -1,25 +1,29 @@
 package ru.otus.hw.security;
 
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import ru.otus.hw.config.SecurityConfiguration;
 import ru.otus.hw.controllers.*;
 import ru.otus.hw.services.AuthorService;
 import ru.otus.hw.services.BookService;
 import ru.otus.hw.services.CommentService;
 import ru.otus.hw.services.GenreService;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.stream.Stream;
+
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @DisplayName("Тесты контроллеров")
 @WebMvcTest({
@@ -46,88 +50,61 @@ class SecurityControllerTest {
     @MockitoBean
     private CommentService commentService;
 
-    @Test
-    @DisplayName("Неаутентифицированный пользователь не должен получать список книг")
-    void anUnauthenticatedUserShouldNotGetBooksList() throws Exception {
-        mvc.perform(get("/api/books"))
+    @DisplayName("Публичные ресурсы должны быть доступны без аутентификации")
+    @ParameterizedTest(name = "{0} {1} -> {2}")
+    @MethodSource("publicResources")
+    void shouldAllowAnonymousAccessToPublicResources(HttpMethod method,
+                                                     String url,
+                                                     int status) throws Exception {
+        mvc.perform(buildRequest(method, url))
+                .andExpect(status().is(status));
+    }
+
+    @DisplayName("Защищённые ресурсы должны перенаправлять неаутентифицированного пользователя на страницу логина")
+    @ParameterizedTest(name = "{0} {1}")
+    @MethodSource("protectedResources")
+    void shouldRedirectAnonymousUserToLogin(HttpMethod method, String url) throws Exception {
+        mvc.perform(buildRequest(method, url))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrlPattern("**/login.html"));
     }
 
-    @Test
-    @DisplayName("Неаутентифицированный пользователь не должен получать книгу по id")
-    void anUnauthenticatedUserShouldNotGetBookDetails() throws Exception {
-        mvc.perform(get("/api/books/1"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrlPattern("**/login.html"));
+    @DisplayName("Защищённые ресурсы должны быть доступны аутентифицированному пользователю")
+    @ParameterizedTest(name = "{0} {1} -> {2}")
+    @MethodSource("protectedResources")
+    @WithMockUser(username = "user")
+    void shouldAllowAuthenticatedUserToAccessProtectedResources(HttpMethod method,
+                                                                String url,
+                                                                int expectedStatus) throws Exception {
+        mvc.perform(buildRequest(method, url))
+                .andExpect(status().is(expectedStatus));
     }
 
-    @Test
-    @DisplayName("Неаутентифицированный пользователь не должен создавать книгу")
-    void anUnauthenticatedUserShouldNotBookCreation() throws Exception {
-        mvc.perform(post("/api/books"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrlPattern("**/login.html"));
+    private static Stream<Arguments> publicResources() {
+        return Stream.of(
+                Arguments.of(HttpMethod.GET, "/login.html", 200)
+        );
     }
 
-    @Test
-    @DisplayName("Неаутентифицированный пользователь не должен обновлять книгу")
-    void anUnauthenticatedUserShouldNotBookUpdate() throws Exception {
-        mvc.perform(put("/api/books/1"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrlPattern("**/login.html"));
+    private static Stream<Arguments> protectedResources() {
+        return Stream.of(
+                Arguments.of(HttpMethod.GET, "/api/books", 200),
+                Arguments.of(HttpMethod.GET, "/api/books/1", 200),
+                Arguments.of(HttpMethod.POST, "/api/books", 400),
+                Arguments.of(HttpMethod.PUT, "/api/books/1", 400),
+                Arguments.of(HttpMethod.DELETE, "/api/books/1", 204),
+                Arguments.of(HttpMethod.GET, "/api/authors", 200),
+                Arguments.of(HttpMethod.GET, "/api/genres", 200),
+                Arguments.of(HttpMethod.GET, "/api/comments/books/1", 200)
+        );
     }
 
-    @Test
-    @DisplayName("Неаутентифицированный пользователь не должен удалять книгу")
-    void anUnauthenticatedUserShouldNotBookDeletion() throws Exception {
-        mvc.perform(delete("/api/books/1"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrlPattern("**/login.html"));
-    }
 
-    @Test
-    @DisplayName("Неаутентифицированный пользователь не должен получать авторов")
-    void anUnauthenticatedUserShouldNotGetAuthors() throws Exception {
-        mvc.perform(get("/api/authors"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrlPattern("**/login.html"));
-    }
-
-    @Test
-    @DisplayName("Неаутентифицированный пользователь не должен получать жанры")
-    void anUnauthenticatedUserShouldNotGetGenres() throws Exception {
-        mvc.perform(get("/api/genres"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrlPattern("**/login.html"));
-    }
-
-    @Test
-    @DisplayName("Неаутентифицированный пользователь не должен получать комментарии книги")
-    void anUnauthenticatedUserShouldNotGetBookComments() throws Exception {
-        mvc.perform(get("/api/books/1/comments"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrlPattern("**/login.html"));
-    }
-
-    @Test
-    @DisplayName("Аутентифицированный пользователь должен иметь доступ к списку книг")
-    void shouldAllowAuthenticatedUserToGetBooks() throws Exception {
-        mvc.perform(get("/api/books").with(user("user")))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @DisplayName("Аутентифицированный пользователь должен иметь доступ к списку авторов")
-    void shouldAllowAuthenticatedUserToGetAuthors() throws Exception {
-        mvc.perform(get("/api/authors").with(user("user")))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @DisplayName("Аутентифицированный пользователь должен иметь доступ к списку жанров")
-    void shouldAllowAuthenticatedUserToGetGenres() throws Exception {
-        mvc.perform(get("/api/genres").with(user("user")))
-                .andExpect(status().isOk());
+    private static MockHttpServletRequestBuilder buildRequest(HttpMethod method, String url) {
+        MockHttpServletRequestBuilder requestBuilder = request(method, url);
+        if (method == HttpMethod.POST || method == HttpMethod.PUT || method == HttpMethod.DELETE) {
+            requestBuilder.with(csrf());
+        }
+        return requestBuilder;
     }
 }

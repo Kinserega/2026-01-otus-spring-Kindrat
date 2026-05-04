@@ -19,6 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @DisplayName("Тестирование контроллера авторов")
 @WebMvcTest(AuthorController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class AuthorControllerTest {
 
     @Autowired

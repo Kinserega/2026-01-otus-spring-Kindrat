@@ -10,11 +10,11 @@ import ru.otus.hw.repositories.UserRepository;
 import java.util.List;
 
 @Service
-public class MyUserDetailService implements UserDetailsService {
+public class CustomUserDetailService implements UserDetailsService {
 
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    public MyUserDetailService(UserRepository userRepository) {
+    public CustomUserDetailService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
