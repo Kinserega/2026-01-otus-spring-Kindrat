@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Edit book</title>
+    <style type="text/css">
+        body {
+            padding: 50px;
+        }
+
+        label {
+            display: inline-block;
+            width: 100px;
+        }
+
+        input:read-only {
+            background: lightgray;
+        }
+
+        .row {
+            margin-top: 10px;
+        }
+
+        .errors {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Book edition -->
+<form id="edit-form"
+      th:action="${book.id == null} ? @{/create_book} : @{/update_book(id=${book.id})}"
+      method="post"
+      th:object="${book}">
+
+    <h3>Книга:</h3>
+
+    <!-- ID -->
+    <div class="row" th:if="*{id} != null">
+        <label for="id-input">ID:</label>
+        <input id="id-input" type="text" readonly="readonly" th:value="*{id}"/>
+    </div>
+
+    <!-- TITLE -->
+    <div class="row">
+        <label for="book-title-input">Название:</label>
+        <input id="book-title-input" type="text" th:field="*{title}"/>
+        <div class="errors"
+             th:if="${#fields.hasErrors('title')}"
+             th:errors="*{title}">
+        </div>
+    </div>
+
+    <div class="row">
+        <label for="author-select">Автор:</label>
+        <select id="author-select" th:field="*{authorId}">
+            <option value="">--Выбрать--</option>
+            <option th:each="author : ${authors}"
+                    th:value="${author.id}"
+                    th:text="${author.fullName}">
+            </option>
+        </select>
+        <div class="errors"
+             th:if="${#fields.hasErrors('authorId')}"
+             th:errors="*{authorId}">
+        </div>
+    </div>
+
+    <div class="row">
+        <label for="genre-select">Жанры:</label>
+        <select id="genre-select" th:field="*{genreIds}" multiple size="5">
+            <option th:each="genre : ${genres}"
+                    th:value="${genre.id}"
+                    th:text="${genre.name}">
+            </option>
+        </select>
+        <div class="errors"
+             th:if="${#fields.hasErrors('genreIds')}"
+             th:errors="*{genreIds}">Wrong book genre error</div>
+        </div>
+    </div>
+
+    <div class="row">
+        <button type="submit">Сохранить</button>
+        <a th:href="@{/}">
+            <button type="button">Отмена</button>
+        </a>
+    </div>
+
+</form>
+</body>
+</html>
