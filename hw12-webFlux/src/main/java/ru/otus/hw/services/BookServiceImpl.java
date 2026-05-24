@@ -9,12 +9,13 @@ import ru.otus.hw.dto.BookCreateDto;
 import ru.otus.hw.dto.BookDto;
 import ru.otus.hw.dto.BookUpdateDto;
 import ru.otus.hw.exceptions.EntityNotFoundException;
+import ru.otus.hw.mapper.BookMapper;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.repositories.AuthorRepository;
-import ru.otus.hw.repositories.BookReadRepository;
 import ru.otus.hw.repositories.BookRepository;
 import ru.otus.hw.repositories.GenreRepository;
 
+import java.util.List;
 import java.util.Set;
 
 @RequiredArgsConstructor
@@ -26,50 +27,55 @@ public class BookServiceImpl implements BookService {
 
     private final BookRepository bookRepository;
 
-    private final BookReadRepository bookReadRepository;
+    private final BookMapper bookMapper;
 
 
     @Override
     @Transactional(readOnly = true)
     public Flux<BookDto> findAll() {
-        return bookReadRepository.findAll();
+        return bookRepository.findAllWithRelations()
+                .map(bookMapper::toDto);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Mono<BookDto> findById(long id) {
-        return bookReadRepository.findById(id)
+        return bookRepository.findByIdWithRelations(id)
                 .switchIfEmpty(Mono.error(new EntityNotFoundException(
                         "Book with id %d not found".formatted(id)
-                )));
+                )))
+                .map(bookMapper::toDto);
     }
 
     @Override
     @Transactional
     public Mono<BookDto> insert(BookCreateDto dto) {
-        return validateReferences(dto.authorId(), dto.genreIds())
-                .then(bookRepository.save(new Book(null, dto.title(), dto.authorId())))
-                .flatMap(savedBook -> saveGenreLinks(savedBook.getId(), dto.genreIds())
-                        .then(findById(savedBook.getId())));
+        return save(null, dto.title(), dto.authorId(), dto.genreIds())
+                .map(bookMapper::toDto);
     }
 
     @Override
     @Transactional
     public Mono<BookDto> update(long id, BookUpdateDto dto) {
         return validateBookExists(id)
-                .then(validateReferences(dto.authorId(), dto.genreIds()))
-                .then(bookRepository.save(new Book(id, dto.title(), dto.authorId())))
-                .flatMap(savedBook -> bookRepository.deleteGenreLinksByBookId(savedBook.getId())
-                        .then(saveGenreLinks(savedBook.getId(), dto.genreIds()))
-                        .then(findById(savedBook.getId())));
+                .then(save(id, dto.title(), dto.authorId(), dto.genreIds()))
+                .map(bookMapper::toDto);
     }
 
     @Override
     @Transactional
     public Mono<Void> deleteById(long id) {
         return validateBookExists(id)
-                .then(bookRepository.deleteGenreLinksByBookId(id))
                 .then(bookRepository.deleteById(id));
+    }
+
+    private Mono<Book> save(Long id, String title, Long authorId, Set<Long> genreIds) {
+        return validateReferences(authorId, genreIds)
+                .then(authorRepository.findById(authorId))
+                .map(author -> new Book(id, title, author, List.of()))
+                .flatMap(book -> id == null
+                        ? bookRepository.saveBookWithGenres(book, genreIds)
+                        : bookRepository.updateBookWithGenres(book, genreIds));
     }
 
     private Mono<Void> validateBookExists(long id) {
@@ -82,10 +88,12 @@ public class BookServiceImpl implements BookService {
     }
 
     private Mono<Void> validateReferences(Long authorId, Set<Long> genreIds) {
+        if (authorId == null) {
+            return Mono.error(new IllegalArgumentException("Author id must not be null"));
+        }
         if (genreIds == null || genreIds.isEmpty()) {
             return Mono.error(new IllegalArgumentException("Genre ids must not be null or empty"));
         }
-
         return validateAuthorExists(authorId)
                 .then(validateGenresExist(genreIds));
     }
@@ -106,12 +114,6 @@ public class BookServiceImpl implements BookService {
                 .switchIfEmpty(Mono.error(new EntityNotFoundException(
                         "One or all genres with ids %s not found".formatted(genreIds)
                 )))
-                .then();
-    }
-
-    private Mono<Void> saveGenreLinks(Long bookId, Set<Long> genreIds) {
-        return Flux.fromIterable(genreIds)
-                .flatMap(genreId -> bookRepository.addGenreLink(bookId, genreId))
                 .then();
     }
 }

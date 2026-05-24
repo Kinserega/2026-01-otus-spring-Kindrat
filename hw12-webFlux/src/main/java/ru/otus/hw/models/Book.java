@@ -6,9 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.ToString;
 import lombok.EqualsAndHashCode;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.relational.core.mapping.Table;
 
-@Table("books")
+import java.util.List;
+
 @Getter
 @AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -25,5 +25,8 @@ public class Book {
     private final String title;
 
     @NotNull
-    private final Long authorId;
+    private final Author author;
+
+    @NotNull
+    private final List<Genre> genres;
 }

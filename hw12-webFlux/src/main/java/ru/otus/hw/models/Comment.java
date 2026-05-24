@@ -8,13 +8,11 @@ import lombok.AllArgsConstructor;
 import lombok.ToString;
 import lombok.EqualsAndHashCode;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.relational.core.mapping.Table;
 
 @Setter
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "comments")
 @ToString
 @EqualsAndHashCode
 public class Comment {
@@ -26,5 +24,5 @@ public class Comment {
     private String text;
 
     @NotNull
-    private Long bookId;
+    private Book book;
 }
