@@ -15,7 +15,6 @@ import ru.otus.hw.repositories.AuthorRepository;
 import ru.otus.hw.repositories.BookRepository;
 import ru.otus.hw.repositories.GenreRepository;
 
-import java.util.List;
 import java.util.Set;
 
 @RequiredArgsConstructor
@@ -72,10 +71,11 @@ public class BookServiceImpl implements BookService {
     private Mono<Book> save(Long id, String title, Long authorId, Set<Long> genreIds) {
         return validateReferences(authorId, genreIds)
                 .then(authorRepository.findById(authorId))
-                .map(author -> new Book(id, title, author, List.of()))
+                .zipWith(genreRepository.findAllByIdIn(genreIds).collectList())
+                .map(tuple -> new Book(id, title, tuple.getT1(), tuple.getT2()))
                 .flatMap(book -> id == null
-                        ? bookRepository.saveBookWithGenres(book, genreIds)
-                        : bookRepository.updateBookWithGenres(book, genreIds));
+                        ? bookRepository.saveBookWithGenres(book)
+                        : bookRepository.updateBookWithGenres(book));
     }
 
     private Mono<Void> validateBookExists(long id) {

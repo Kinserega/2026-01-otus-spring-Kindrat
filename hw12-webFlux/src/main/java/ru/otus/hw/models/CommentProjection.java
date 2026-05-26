@@ -10,7 +10,7 @@ import org.springframework.data.relational.core.mapping.Table;
 @Table("comments")
 @Getter
 @AllArgsConstructor
-public class CommentEntity {
+public class CommentProjection {
 
     @Id
     private final Long id;

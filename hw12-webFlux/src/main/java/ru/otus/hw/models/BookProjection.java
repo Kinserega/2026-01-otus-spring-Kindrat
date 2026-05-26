@@ -10,7 +10,7 @@ import org.springframework.data.relational.core.mapping.Table;
 @Table("books")
 @Getter
 @AllArgsConstructor
-public class BookEntity {
+public class BookProjection {
 
     @Id
     private final Long id;

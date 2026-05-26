@@ -1,4 +1,4 @@
-package ru.otus.hw.services;
+package ru.otus.hw.repositories;
 
 import io.r2dbc.spi.Row;
 import io.r2dbc.spi.RowMetadata;
@@ -12,7 +12,6 @@ import ru.otus.hw.models.Genre;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 @RequiredArgsConstructor
 public class BookRepositoryCustomImpl implements BookRepositoryCustom {
@@ -72,7 +71,7 @@ public class BookRepositoryCustomImpl implements BookRepositoryCustom {
     }
 
     @Override
-    public Mono<Book> saveBookWithGenres(Book book, Set<Long> genreIds) {
+    public Mono<Book> saveBookWithGenres(Book book) {
         return databaseClient.sql("""
                         insert into books(title, author_id)
                         values (:title, :authorId)
@@ -82,12 +81,12 @@ public class BookRepositoryCustomImpl implements BookRepositoryCustom {
                 .filter(statement -> statement.returnGeneratedValues("id"))
                 .map((row, metadata) -> row.get("id", Long.class))
                 .one()
-                .flatMap(savedBookId -> addGenresToBook(savedBookId, genreIds)
+                .flatMap(savedBookId -> addGenresToBook(savedBookId, book.getGenres())
                         .then(findByIdWithRelations(savedBookId)));
     }
 
     @Override
-    public Mono<Book> updateBookWithGenres(Book book, Set<Long> genreIds) {
+    public Mono<Book> updateBookWithGenres(Book book) {
         return databaseClient.sql("""
                         update books
                         set title = :title,
@@ -99,7 +98,7 @@ public class BookRepositoryCustomImpl implements BookRepositoryCustom {
                 .bind("authorId", book.getAuthor().getId())
                 .then()
                 .then(removeGenresFromBook(book.getId()))
-                .then(addGenresToBook(book.getId(), genreIds))
+                .then(addGenresToBook(book.getId(), book.getGenres()))
                 .then(findByIdWithRelations(book.getId()));
     }
 
@@ -112,19 +111,19 @@ public class BookRepositoryCustomImpl implements BookRepositoryCustom {
                 .then();
     }
 
-    private Mono<Void> addGenresToBook(Long bookId, Set<Long> genreIds) {
-        return Flux.fromIterable(genreIds)
-                .flatMap(genreId -> addGenreToBook(bookId, genreId))
+    private Mono<Void> addGenresToBook(Long bookId, List<Genre> genres) {
+        return Flux.fromIterable(genres)
+                .flatMap(genre -> addGenreToBook(bookId, genre))
                 .then();
     }
 
-    private Mono<Void> addGenreToBook(Long bookId, Long genreId) {
+    private Mono<Void> addGenreToBook(Long bookId, Genre genre) {
         return databaseClient.sql("""
                         insert into books_genres(book_id, genre_id)
                         values (:bookId, :genreId)
                         """)
                 .bind("bookId", bookId)
-                .bind("genreId", genreId)
+                .bind("genreId", genre.getId())
                 .then();
     }
 
