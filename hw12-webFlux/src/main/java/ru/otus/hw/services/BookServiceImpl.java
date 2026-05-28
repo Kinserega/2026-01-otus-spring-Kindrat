@@ -10,11 +10,14 @@ import ru.otus.hw.dto.BookDto;
 import ru.otus.hw.dto.BookUpdateDto;
 import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.mapper.BookMapper;
+import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
+import ru.otus.hw.models.Genre;
 import ru.otus.hw.repositories.AuthorRepository;
 import ru.otus.hw.repositories.BookRepository;
 import ru.otus.hw.repositories.GenreRepository;
 
+import java.util.List;
 import java.util.Set;
 
 @RequiredArgsConstructor
@@ -70,8 +73,7 @@ public class BookServiceImpl implements BookService {
 
     private Mono<Book> save(Long id, String title, Long authorId, Set<Long> genreIds) {
         return validateReferences(authorId, genreIds)
-                .then(authorRepository.findById(authorId))
-                .zipWith(genreRepository.findAllByIdIn(genreIds).collectList())
+                .then(Mono.zip(findAuthorById(authorId), findGenresByIds(genreIds)))
                 .map(tuple -> new Book(id, title, tuple.getT1(), tuple.getT2()))
                 .flatMap(book -> id == null
                         ? bookRepository.saveBookWithGenres(book)
@@ -94,26 +96,22 @@ public class BookServiceImpl implements BookService {
         if (genreIds == null || genreIds.isEmpty()) {
             return Mono.error(new IllegalArgumentException("Genre ids must not be null or empty"));
         }
-        return validateAuthorExists(authorId)
-                .then(validateGenresExist(genreIds));
+        return Mono.empty();
     }
 
-    private Mono<Void> validateAuthorExists(Long authorId) {
-        return authorRepository.existsById(authorId)
-                .filter(Boolean::booleanValue)
+    private Mono<Author> findAuthorById(Long authorId) {
+        return authorRepository.findById(authorId)
                 .switchIfEmpty(Mono.error(new EntityNotFoundException(
                         "Author with id %d not found".formatted(authorId)
-                )))
-                .then();
+                )));
     }
 
-    private Mono<Void> validateGenresExist(Set<Long> genreIds) {
+    private Mono<List<Genre>> findGenresByIds(Set<Long> genreIds) {
         return genreRepository.findAllByIdIn(genreIds)
-                .count()
-                .filter(foundCount -> foundCount == genreIds.size())
+                .collectList()
+                .filter(genres -> genres.size() == genreIds.size())
                 .switchIfEmpty(Mono.error(new EntityNotFoundException(
                         "One or all genres with ids %s not found".formatted(genreIds)
-                )))
-                .then();
+                )));
     }
 }
