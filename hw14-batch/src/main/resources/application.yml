@@ -1,0 +1,26 @@
+spring:
+  datasource:
+    show-sql: true
+    url: jdbc:h2:mem:maindb
+
+  sql:
+    init:
+      mode: always
+      data-locations: data.sql
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+#
+#
+#mongock:
+#  runner-type: initializingbean
+#  change-logs-scan-package:
+#    - ru.otus.hw.mongock.changelog
+#  mongo-db:
+#    write-concern:
+#      journal: false
+#    read-concern: local
