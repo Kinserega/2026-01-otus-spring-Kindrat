@@ -73,7 +73,8 @@ public class AuthorMigrationStepConfig {
     public CachedMongoItemWriter<AuthorDocument> authorWriter() {
         return new CachedMongoItemWriter<>(
                 mongoTemplate,
-                migrationDocumentCache::putAuthor
+                migrationDocumentCache::putAuthor,
+                "authors"
         );
     }
 }

@@ -93,7 +93,8 @@ public class BookMigrationStepConfig {
     public CachedMongoItemWriter<BookDocument> bookWriter() {
         return new CachedMongoItemWriter<>(
                 mongoTemplate,
-                migrationDocumentCache::putBook
+                migrationDocumentCache::putBook,
+                "books"
         );
     }
 }

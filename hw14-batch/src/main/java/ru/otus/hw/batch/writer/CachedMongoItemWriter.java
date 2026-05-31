@@ -6,6 +6,7 @@ import org.springframework.batch.item.ItemWriter;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import ru.otus.hw.batch.model.CachedMigrationItem;
 
+import java.util.List;
 import java.util.function.BiConsumer;
 
 @RequiredArgsConstructor
@@ -15,11 +16,16 @@ public class CachedMongoItemWriter<T> implements ItemWriter<CachedMigrationItem<
 
     private final BiConsumer<Long, T> cacheWriter;
 
+    private final String collectionName;
+
     @Override
     public void write(Chunk<? extends CachedMigrationItem<T>> chunk) {
+        List<T> documents = chunk.getItems().stream()
+                .map(CachedMigrationItem::document)
+                .toList();
+        mongoTemplate.insert(documents, collectionName);
         chunk.getItems().forEach(item -> {
-            T savedDocument = mongoTemplate.insert(item.document());
-            cacheWriter.accept(item.sourceId(), savedDocument);
+            cacheWriter.accept(item.sourceId(), item.document());
         });
     }
 }

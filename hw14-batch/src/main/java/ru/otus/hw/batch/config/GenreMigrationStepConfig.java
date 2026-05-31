@@ -73,7 +73,8 @@ public class GenreMigrationStepConfig {
     public CachedMongoItemWriter<GenreDocument> genreWriter() {
         return new CachedMongoItemWriter<>(
                 mongoTemplate,
-                migrationDocumentCache::putGenre
+                migrationDocumentCache::putGenre,
+                "genres"
         );
     }
 }
