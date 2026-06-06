@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Авторы</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 20px auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #000; padding: 5px; text-align: left; }
+        nav a { margin-right: 15px; color: #000; }
+    </style>
+</head>
+<body>
+<nav>
+    <a href="/">Книги</a>
+    <a href="/authors.html">Авторы</a>
+    <a href="/genres.html">Жанры</a>
+</nav>
+
+<h1>Авторы</h1>
+<table>
+    <thead><tr><th>ID</th><th>ФИО</th></tr></thead>
+    <tbody id="authors"></tbody>
+</table>
+
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const res = await fetch('/api/authors');
+            const authors = await res.json();
+            document.getElementById('authors').innerHTML = authors.map(a =>
+                `<tr><td>${a.id}</td><td>${a.fullName}</td></tr>`
+            ).join('');
+        } catch (e) {
+            document.getElementById('authors').innerHTML = '<tr><td colspan="2">Ошибка</td></tr>';
+        }
+    });
+</script>
+</body>
+</html>
