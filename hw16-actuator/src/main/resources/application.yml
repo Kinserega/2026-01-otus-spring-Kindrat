@@ -1,0 +1,34 @@
+spring:
+  datasource:
+    show-sql: true
+    url: jdbc:h2:mem:maindb
+  data:
+    rest:
+      base-path: /data-rest
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+      data-locations: classpath:data.sql
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,logfile
+  endpoint:
+    health:
+      show-details: always
+    logfile:
+      enabled: true
+
+logging:
+  file:
+    name: logs/application.log
