@@ -1,0 +1,34 @@
+[
+  {
+    "id": 1,
+    "customerName": "Иван Петров",
+    "productName": "Ноутбук",
+    "quantity": 1,
+    "totalAmount": 85000,
+    "deliveryAddress": "Москва, ул. Ленина"
+  },
+  {
+    "id": 2,
+    "customerName": "Анна Смирнова",
+    "productName": "Компьютер",
+    "quantity": 1,
+    "totalAmount": 250000,
+    "deliveryAddress": "Санкт-Петербург, Невский проспект"
+  },
+  {
+    "id": 3,
+    "customerName": "Павел Иванов",
+    "productName": "Клавиатура",
+    "quantity": 0,
+    "totalAmount": 5000,
+    "deliveryAddress": "Казань, ул. Баумана"
+  },
+  {
+    "id": 4,
+    "customerName": "Сергей Кузнецов",
+    "productName": "Монитор",
+    "quantity": 2,
+    "totalAmount": 60000,
+    "deliveryAddress": "Екатеринбург, ул. Малышева"
+  }
+]
