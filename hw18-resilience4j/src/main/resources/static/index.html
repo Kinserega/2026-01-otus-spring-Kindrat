@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Книги</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 900px; margin: 20px auto; padding: 0 10px; }
+        table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+        th, td { border: 1px solid #000; padding: 5px; text-align: left; }
+        input, select { padding: 3px; margin: 2px; }
+        select[multiple] { height: 60px; }
+        button { background: #000; color: #fff; border: none; padding: 5px 10px; cursor: pointer; margin: 2px; }
+        button:hover { background: #333; }
+        .hidden { display: none; }
+        .error { color: red; }
+        .comment { border-left: 3px solid #000; padding-left: 10px; margin: 10px 0; }
+        nav a { margin-right: 15px; color: #000; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="/">Книги</a>
+    <a href="/authors.html">Авторы</a>
+    <a href="/genres.html">Жанры</a>
+</nav>
+
+<h1>Книги</h1>
+
+<div id="form" class="hidden">
+    <h3 id="formTitle">Книга</h3>
+    <input type="hidden" id="bookId">
+    <div><label>Название:</label> <input type="text" id="title" required></div>
+    <div><label>Автор:</label> <select id="author" required></select></div>
+    <div><label>Жанры:</label> <select id="genres" multiple required></select></div>
+    <button onclick="save()">Сохранить</button>
+    <button onclick="cancel()">Отмена</button>
+    <div id="formError" class="error"></div>
+</div>
+
+<button onclick="showForm()">+ Добавить</button>
+<div id="msg"></div>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Название</th>
+        <th>Автор</th>
+        <th>Жанры</th>
+        <th>Действия</th>
+    </tr>
+    </thead>
+    <tbody id="books"></tbody>
+</table>
+
+<div id="commentsSection" class="hidden" style="margin-top: 30px;">
+    <h2>Комментарии: <span id="bookTitle"></span></h2>
+    <div id="commentsList"></div>
+    <button onclick="hideComments()" style="margin-top:15px">Закрыть</button>
+</div>
+
+<script>
+    const API = { BOOKS: '/api/books', AUTHORS: '/api/authors', GENRES: '/api/genres', COMMENTS:'/api/comments'};
+    let authors = [], genres = [], currentBookId = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        await Promise.all([loadBooks(), loadAuthors(), loadGenres()]);
+    });
+
+    async function loadBooks() {
+        try {
+            const res = await fetch(API.BOOKS);
+            if (!res.ok) throw new Error();
+            const books = await res.json();
+            document.getElementById('books').innerHTML = books.map(b => `
+                <tr>
+                    <td>${b.id}</td>
+                    <td>${esc(b.title)}</td>
+                    <td>${esc(b.author?.fullName || '-')}</td>
+                    <td>${esc((b.genres || []).map(g => g.name).join(', ') || '-')}</td>
+                    <td>
+                        <button onclick='edit(${JSON.stringify(b)})'>Ред.</button>
+                        <button onclick="del(${b.id})">Удалить</button>
+                        <button onclick="showComments(${b.id}, '${esc(b.title)}')">Комментарии</button>
+                    </td>
+                </tr>
+            `).join('');
+        } catch (e) { msg('Ошибка загрузки книг', true); }
+    }
+
+    async function loadAuthors() {
+        try {
+            const res = await fetch(API.AUTHORS);
+            authors = await res.json();
+        } catch (e) { console.error(e); }
+    }
+
+    async function loadGenres() {
+        try {
+            const res = await fetch(API.GENRES);
+            genres = await res.json();
+        } catch (e) { console.error(e); }
+    }
+
+    function showForm() {
+        document.getElementById('formTitle').textContent = 'Новая книга';
+        document.getElementById('bookId').value = '';
+        document.getElementById('title').value = '';
+        fillSelects();
+        document.getElementById('form').classList.remove('hidden');
+        document.getElementById('formError').textContent = '';
+    }
+
+    function fillSelects() {
+        const authorSel = document.getElementById('author');
+        authorSel.innerHTML = '<option value="">-- Автор --</option>' +
+            authors.map(a => `<option value="${a.id}">${a.fullName}</option>`).join('');
+
+        const genreSel = document.getElementById('genres');
+        genreSel.innerHTML = genres.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
+    }
+
+    function edit(book) {
+        document.getElementById('formTitle').textContent = 'Редактировать';
+        document.getElementById('bookId').value = book.id;
+        document.getElementById('title').value = book.title;
+
+        const authorSel = document.getElementById('author');
+        authorSel.innerHTML = '<option value="">-- Автор --</option>' +
+            authors.map(a => `<option value="${a.id}" ${a.id === book.author?.id ? 'selected' : ''}>${a.fullName}</option>`).join('');
+
+        const genreIds = book.genres?.map(g => g.id) || [];
+        const genreSel = document.getElementById('genres');
+        genreSel.innerHTML = genres.map(g => `<option value="${g.id}" ${genreIds.includes(g.id) ? 'selected' : ''}>${g.name}</option>`).join('');
+
+        document.getElementById('form').classList.remove('hidden');
+        document.getElementById('formError').textContent = '';
+    }
+
+    function cancel() {
+        document.getElementById('form').classList.add('hidden');
+    }
+
+    async function save() {
+        const id = document.getElementById('bookId').value;
+        const title = document.getElementById('title').value.trim();
+        const authorId = document.getElementById('author').value;
+        const genreIds = Array.from(document.getElementById('genres').selectedOptions).map(o => parseInt(o.value));
+
+        if (!title || !authorId || genreIds.length === 0) {
+            document.getElementById('formError').textContent = 'Заполните все поля';
+            return;
+        }
+
+        const payload = { title, authorId: parseInt(authorId), genreIds };
+        const method = id ? 'PUT' : 'POST';
+        const url = id ? `${API.BOOKS}/${id}` : API.BOOKS;
+
+        try {
+            const res = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!res.ok) throw new Error(await res.text());
+            cancel();
+            await loadBooks();
+            msg(id ? 'Обновлено' : 'Создано', false);
+        } catch (e) {
+            document.getElementById('formError').textContent = e.message;
+        }
+    }
+
+    async function del(id) {
+        if (!confirm('Удалить?')) return;
+        try {
+            const res = await fetch(`${API.BOOKS}/${id}`, { method: 'DELETE' });
+            if (!res.ok) throw new Error();
+            await loadBooks();
+            msg('Удалено', false);
+        } catch (e) { msg('Ошибка', true); }
+    }
+
+    // Комментарии
+    async function showComments(bookId,title){
+      currentBookId=bookId;document.getElementById('bookTitle').textContent=title;
+      document.getElementById('commentsSection').classList.remove('hidden');
+      await loadComments(bookId);
+    }
+
+    function hideComments(){document.getElementById('commentsSection').classList.add('hidden');currentBookId=null;}
+
+    async function loadComments(bookId){
+      try{
+        const res=await fetch(`${API.COMMENTS}/books/${bookId}`),comments=await res.json();
+        if(comments.length===0){
+          document.getElementById('commentsList').innerHTML='<p>Комментариев пока нет</p>';
+        }else{
+          document.getElementById('commentsList').innerHTML=comments.map(c=>`
+            <div class="comment">
+              <div class="comment-text">${esc(c.text)}</div>
+            </div>`).join('');
+        }
+      }catch(e){document.getElementById('commentsList').innerHTML='<p class="error">Ошибка загрузки комментариев</p>';}
+    }
+
+    function msg(text, isError) {
+        const el = document.getElementById('msg');
+        el.textContent = text;
+        el.className = isError ? 'error' : '';
+        setTimeout(() => el.textContent = '', 3000);
+    }
+
+    function esc(str) {
+        const div = document.createElement('div');
+        div.textContent = str || '';
+        return div.innerHTML;
+    }
+</script>
+</body>
+</html>

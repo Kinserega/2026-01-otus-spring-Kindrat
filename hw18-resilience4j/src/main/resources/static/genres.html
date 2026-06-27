@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Жанры</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 20px auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #000; padding: 5px; text-align: left; }
+        nav a { margin-right: 15px; color: #000; }
+    </style>
+</head>
+<body>
+<nav>
+    <a href="/">Книги</a>
+    <a href="/authors.html">Авторы</a>
+    <a href="/genres.html">Жанры</a>
+</nav>
+
+<h1>Жанры</h1>
+<table>
+    <thead><tr><th>ID</th><th>Название</th></tr></thead>
+    <tbody id="genres"></tbody>
+</table>
+
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const res = await fetch('/api/genres');
+            const genres = await res.json();
+            document.getElementById('genres').innerHTML = genres.map(g =>
+                `<tr><td>${g.id}</td><td>${g.name}</td></tr>`
+            ).join('');
+        } catch (e) {
+            document.getElementById('genres').innerHTML = '<tr><td colspan="2">Ошибка</td></tr>';
+        }
+    });
+</script>
+</body>
+</html>
