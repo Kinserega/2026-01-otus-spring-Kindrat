@@ -1,0 +1,28 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: template-service
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+template:
+  default-format: DOCX
+
+  templates:
+    financial-report:
+      path: classpath:templates/financial-report.docx
+      file-name: financial-report
+      enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,caches
+  endpoint:
+    health:
+      show-details: always

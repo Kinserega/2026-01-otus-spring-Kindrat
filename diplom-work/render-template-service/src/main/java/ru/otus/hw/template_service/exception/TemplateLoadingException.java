@@ -1,0 +1,12 @@
+package ru.otus.hw.template_service.exception;
+
+public class TemplateLoadingException extends RuntimeException {
+
+    public TemplateLoadingException(String message) {
+        super(message);
+    }
+
+    public TemplateLoadingException(String message, Throwable cause) {
+        super(message, cause);
+    }
+}
