@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: personal-budget-postgres
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: budget_user
+      POSTGRES_PASSWORD: budget_password
+    ports:
+      - "15432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

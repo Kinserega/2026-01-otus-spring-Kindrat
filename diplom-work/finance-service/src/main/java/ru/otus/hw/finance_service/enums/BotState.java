@@ -1,0 +1,20 @@
+package ru.otus.hw.finance_service.enums;
+
+public enum BotState {
+
+    IDLE,
+
+    WAITING_OPERATION_AMOUNT,
+
+    WAITING_OPERATION_UPDATE_AMOUNT,
+
+    WAITING_CATEGORY_NAME,
+
+    WAITING_CATEGORY_EMOJI,
+
+    WAITING_CATEGORY_RENAME,
+
+    WAITING_BUDGET_AMOUNT,
+
+    WAITING_BUDGET_UPDATE_AMOUNT
+}
